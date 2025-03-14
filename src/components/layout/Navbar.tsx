@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, User, Search, ChevronDown, Leaf, Sprout, BarChart } from 'lucide-react';
+import { Menu, X, User, Search, ChevronDown, Leaf, Sprout, BarChart, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface NavItem {
   title: string;
@@ -10,50 +11,55 @@ interface NavItem {
   icon?: React.ReactNode;
   isExternal?: boolean;
   dropdown?: { title: string; path: string }[];
+  requiresAuth?: boolean;
 }
-
-const navItems: NavItem[] = [
-  {
-    title: 'Home',
-    path: '/',
-  },
-  {
-    title: 'PlantWisdom Hub',
-    path: '/plant-wisdom',
-    icon: <Leaf className="w-5 h-5" />,
-    dropdown: [
-      { title: '3D Plant Explorer', path: '/plant-wisdom/explorer' },
-      { title: 'Plant Identification', path: '/plant-wisdom/identification' },
-      { title: 'Ayurvedic Knowledge Base', path: '/plant-wisdom/knowledge-base' },
-    ]
-  },
-  {
-    title: 'CropInsight Center',
-    path: '/crop-insight',
-    icon: <Sprout className="w-5 h-5" />,
-    dropdown: [
-      { title: 'Fertilizer Analysis', path: '/crop-insight/fertilizer' },
-      { title: 'Disease Detection', path: '/crop-insight/disease' },
-      { title: 'Crop Recommendations', path: '/crop-insight/recommendations' },
-    ]
-  },
-  {
-    title: 'FarmControl System',
-    path: '/farm-control',
-    icon: <BarChart className="w-5 h-5" />,
-    dropdown: [
-      { title: 'IoT Dashboard', path: '/farm-control/dashboard' },
-      { title: 'Irrigation Control', path: '/farm-control/irrigation' },
-      { title: 'Environmental Analysis', path: '/farm-control/environment' },
-    ]
-  },
-];
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const location = useLocation();
+  const { isAuthenticated, user, logout } = useAuth();
+
+  const navItems: NavItem[] = [
+    {
+      title: 'Home',
+      path: '/',
+    },
+    {
+      title: 'PlantWisdom Hub',
+      path: '/plant-wisdom',
+      icon: <Leaf className="w-5 h-5" />,
+      requiresAuth: true,
+      dropdown: [
+        { title: '3D Plant Explorer', path: '/plant-wisdom/explorer' },
+        { title: 'Plant Identification', path: '/plant-wisdom/identification' },
+        { title: 'Ayurvedic Knowledge Base', path: '/plant-wisdom/knowledge-base' },
+      ]
+    },
+    {
+      title: 'CropInsight Center',
+      path: '/crop-insight',
+      icon: <Sprout className="w-5 h-5" />,
+      requiresAuth: true,
+      dropdown: [
+        { title: 'Fertilizer Analysis', path: '/crop-insight/fertilizer' },
+        { title: 'Disease Detection', path: '/crop-insight/disease' },
+        { title: 'Crop Recommendations', path: '/crop-insight/recommendations' },
+      ]
+    },
+    {
+      title: 'FarmControl System',
+      path: '/farm-control',
+      icon: <BarChart className="w-5 h-5" />,
+      requiresAuth: true,
+      dropdown: [
+        { title: 'IoT Dashboard', path: '/farm-control/dashboard' },
+        { title: 'Irrigation Control', path: '/farm-control/irrigation' },
+        { title: 'Environmental Analysis', path: '/farm-control/environment' },
+      ]
+    },
+  ];
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -87,6 +93,11 @@ const Navbar: React.FC = () => {
     setActiveDropdown(null);
   }, [location.pathname]);
 
+  // Filter nav items based on authentication status
+  const filteredNavItems = navItems.filter(item => 
+    !item.requiresAuth || (item.requiresAuth && isAuthenticated)
+  );
+
   return (
     <header
       className={cn(
@@ -112,7 +123,7 @@ const Navbar: React.FC = () => {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-1">
-          {navItems.map((item) => (
+          {filteredNavItems.map((item) => (
             <div key={item.path} className="relative group">
               {item.dropdown ? (
                 <button
@@ -170,13 +181,37 @@ const Navbar: React.FC = () => {
           <button className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
             <Search className="w-5 h-5" />
           </button>
-          <Link
-            to="/auth"
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-greensense-500 text-white text-sm font-medium hover:bg-greensense-600 transition-colors"
-          >
-            <User className="w-4 h-4" />
-            <span>Sign In</span>
-          </Link>
+
+          {isAuthenticated ? (
+            <div className="flex items-center gap-3">
+              <div className="text-sm font-medium">
+                {user?.name}
+              </div>
+              <button
+                onClick={logout}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-greensense-200 hover:bg-greensense-50 transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="text-sm">Logout</span>
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link
+                to="/auth/login"
+                className="px-4 py-2 rounded-lg text-greensense-600 border border-greensense-200 hover:bg-greensense-50 transition-colors text-sm font-medium"
+              >
+                Login
+              </Link>
+              <Link
+                to="/auth/register"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-greensense-500 text-white text-sm font-medium hover:bg-greensense-600 transition-colors"
+              >
+                <User className="w-4 h-4" />
+                <span>Sign Up</span>
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -195,7 +230,7 @@ const Navbar: React.FC = () => {
           )}
         >
           <nav className="flex flex-col gap-2 mb-8">
-            {navItems.map((item) => (
+            {filteredNavItems.map((item) => (
               <div key={item.path} className="flex flex-col">
                 {item.dropdown ? (
                   <>
@@ -254,13 +289,38 @@ const Navbar: React.FC = () => {
               <Search className="w-5 h-5" />
               <span>Search</span>
             </button>
-            <Link
-              to="/auth"
-              className="w-full py-2.5 rounded-lg bg-greensense-500 text-white flex items-center justify-center gap-2 font-medium"
-            >
-              <User className="w-5 h-5" />
-              <span>Sign In</span>
-            </Link>
+            
+            {isAuthenticated ? (
+              <div className="space-y-3">
+                <div className="px-4 py-2.5 text-center text-sm font-medium border-b border-gray-100 pb-4">
+                  Signed in as <span className="text-greensense-600">{user?.name}</span>
+                </div>
+                <button
+                  onClick={logout}
+                  className="w-full py-2.5 rounded-lg bg-white border border-gray-200 text-gray-700 flex items-center justify-center gap-2 font-medium"
+                >
+                  <LogOut className="w-5 h-5" />
+                  <span>Log Out</span>
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <Link
+                  to="/auth/login"
+                  className="w-full py-2.5 rounded-lg border border-greensense-200 text-greensense-600 flex items-center justify-center gap-2 font-medium"
+                >
+                  <User className="w-5 h-5" />
+                  <span>Login</span>
+                </Link>
+                <Link
+                  to="/auth/register"
+                  className="w-full py-2.5 rounded-lg bg-greensense-500 text-white flex items-center justify-center gap-2 font-medium"
+                >
+                  <User className="w-5 h-5" />
+                  <span>Sign Up</span>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>

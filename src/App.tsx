@@ -4,6 +4,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
@@ -38,35 +41,89 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          
-          {/* Auth Routes */}
-          <Route path="/auth/login" element={<Login />} />
-          <Route path="/auth/register" element={<Register />} />
-          
-          {/* PlantWisdom Hub Routes */}
-          <Route path="/plant-wisdom" element={<PlantWisdom />} />
-          <Route path="/plant-wisdom/explorer" element={<PlantExplorer />} />
-          <Route path="/plant-wisdom/identification" element={<PlantIdentification />} />
-          <Route path="/plant-wisdom/knowledge-base" element={<KnowledgeBase />} />
-          
-          {/* CropInsight Center Routes */}
-          <Route path="/crop-insight" element={<CropInsight />} />
-          <Route path="/crop-insight/fertilizer" element={<FertilizerAnalysis />} />
-          <Route path="/crop-insight/disease" element={<DiseaseDetection />} />
-          <Route path="/crop-insight/recommendations" element={<CropRecommendations />} />
-          
-          {/* FarmControl System Routes */}
-          <Route path="/farm-control" element={<FarmControl />} />
-          <Route path="/farm-control/dashboard" element={<IoTDashboard />} />
-          <Route path="/farm-control/irrigation" element={<IrrigationControl />} />
-          <Route path="/farm-control/environment" element={<EnvironmentalAnalysis />} />
-          
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth/login" element={<Login />} />
+            <Route path="/auth/register" element={<Register />} />
+            
+            {/* Protected Routes */}
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            
+            {/* PlantWisdom Hub Routes */}
+            <Route path="/plant-wisdom" element={
+              <ProtectedRoute>
+                <PlantWisdom />
+              </ProtectedRoute>
+            } />
+            <Route path="/plant-wisdom/explorer" element={
+              <ProtectedRoute>
+                <PlantExplorer />
+              </ProtectedRoute>
+            } />
+            <Route path="/plant-wisdom/identification" element={
+              <ProtectedRoute>
+                <PlantIdentification />
+              </ProtectedRoute>
+            } />
+            <Route path="/plant-wisdom/knowledge-base" element={
+              <ProtectedRoute>
+                <KnowledgeBase />
+              </ProtectedRoute>
+            } />
+            
+            {/* CropInsight Center Routes */}
+            <Route path="/crop-insight" element={
+              <ProtectedRoute>
+                <CropInsight />
+              </ProtectedRoute>
+            } />
+            <Route path="/crop-insight/fertilizer" element={
+              <ProtectedRoute>
+                <FertilizerAnalysis />
+              </ProtectedRoute>
+            } />
+            <Route path="/crop-insight/disease" element={
+              <ProtectedRoute>
+                <DiseaseDetection />
+              </ProtectedRoute>
+            } />
+            <Route path="/crop-insight/recommendations" element={
+              <ProtectedRoute>
+                <CropRecommendations />
+              </ProtectedRoute>
+            } />
+            
+            {/* FarmControl System Routes */}
+            <Route path="/farm-control" element={
+              <ProtectedRoute>
+                <FarmControl />
+              </ProtectedRoute>
+            } />
+            <Route path="/farm-control/dashboard" element={
+              <ProtectedRoute>
+                <IoTDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/farm-control/irrigation" element={
+              <ProtectedRoute>
+                <IrrigationControl />
+              </ProtectedRoute>
+            } />
+            <Route path="/farm-control/environment" element={
+              <ProtectedRoute>
+                <EnvironmentalAnalysis />
+              </ProtectedRoute>
+            } />
+            
+            {/* 404 Route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

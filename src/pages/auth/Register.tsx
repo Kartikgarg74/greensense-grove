@@ -1,9 +1,10 @@
 
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { UserPlus, Mail, Lock, User, ExternalLink, Leaf, CheckCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { UserPlus, Mail, Lock, User, ExternalLink, Leaf } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 const Register = () => {
@@ -15,9 +16,8 @@ const Register = () => {
     userType: 'farmer',
     agreeTerms: false
   });
-  const [isLoading, setIsLoading] = useState(false);
   const [passwordMatch, setPasswordMatch] = useState(true);
-  const navigate = useNavigate();
+  const { register, isLoading } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -37,7 +37,7 @@ const Register = () => {
     }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
@@ -45,13 +45,12 @@ const Register = () => {
       return;
     }
     
-    setIsLoading(true);
-    
-    // Simulate registration
-    setTimeout(() => {
-      setIsLoading(false);
-      navigate('/dashboard');
-    }, 1500);
+    await register({
+      fullName: formData.fullName,
+      email: formData.email,
+      password: formData.password,
+      userType: formData.userType as 'farmer' | 'researcher' | 'student' | 'business' | 'other'
+    });
   };
 
   return (
