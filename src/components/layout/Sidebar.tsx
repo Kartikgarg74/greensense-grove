@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -86,7 +87,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
       if (!overlay) {
         overlay = document.createElement('div');
         overlay.id = 'sidebar-overlay';
-        overlay.className = 'fixed inset-0 bg-black/20 z-20 transition-opacity duration-300';
+        overlay.className = 'fixed inset-0 bg-black/30 z-20 transition-opacity duration-300';
         overlay.onclick = () => setExpandedItem(null);
         document.body.appendChild(overlay);
       }

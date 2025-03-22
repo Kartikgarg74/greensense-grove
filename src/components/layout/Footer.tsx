@@ -69,24 +69,19 @@ const Footer: React.FC = () => {
             <h3 className="font-medium text-base mb-5">Resources</h3>
             <ul className="space-y-3">
               <li>
-                <a href="#" className="text-sm text-gray-600 hover:text-greensense-600 transition-colors">
+                <Link to="/documentation" className="text-sm text-gray-600 hover:text-greensense-600 transition-colors">
                   Documentation
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm text-gray-600 hover:text-greensense-600 transition-colors">
+                <Link to="/documentation/api" className="text-sm text-gray-600 hover:text-greensense-600 transition-colors">
                   API Reference
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm text-gray-600 hover:text-greensense-600 transition-colors">
-                  Blog
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-sm text-gray-600 hover:text-greensense-600 transition-colors">
+                <Link to="/help" className="text-sm text-gray-600 hover:text-greensense-600 transition-colors">
                   Help Center
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -96,24 +91,19 @@ const Footer: React.FC = () => {
             <h3 className="font-medium text-base mb-5">Company</h3>
             <ul className="space-y-3">
               <li>
-                <a href="#" className="text-sm text-gray-600 hover:text-greensense-600 transition-colors">
+                <Link to="/about" className="text-sm text-gray-600 hover:text-greensense-600 transition-colors">
                   About
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm text-gray-600 hover:text-greensense-600 transition-colors">
-                  Careers
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-sm text-gray-600 hover:text-greensense-600 transition-colors">
+                <Link to="/legal/privacy-policy" className="text-sm text-gray-600 hover:text-greensense-600 transition-colors">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm text-gray-600 hover:text-greensense-600 transition-colors">
+                <Link to="/legal/terms-of-service" className="text-sm text-gray-600 hover:text-greensense-600 transition-colors">
                   Terms of Service
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -124,15 +114,12 @@ const Footer: React.FC = () => {
             © {new Date().getFullYear()} GreenSense AI. All rights reserved.
           </p>
           <div className="mt-4 md:mt-0 flex items-center gap-5">
-            <a href="#" className="text-sm text-gray-500 hover:text-greensense-600 transition-colors">
+            <Link to="/legal/privacy-policy" className="text-sm text-gray-500 hover:text-greensense-600 transition-colors">
               Privacy
-            </a>
-            <a href="#" className="text-sm text-gray-500 hover:text-greensense-600 transition-colors">
+            </Link>
+            <Link to="/legal/terms-of-service" className="text-sm text-gray-500 hover:text-greensense-600 transition-colors">
               Terms
-            </a>
-            <a href="#" className="text-sm text-gray-500 hover:text-greensense-600 transition-colors">
-              Cookies
-            </a>
+            </Link>
           </div>
         </div>
       </div>
