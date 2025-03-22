@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -6,7 +5,6 @@ import {
   Leaf, 
   Sprout, 
   BarChart, 
-  Settings, 
   ChevronLeft, 
   ChevronRight 
 } from 'lucide-react';
@@ -80,12 +78,10 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
     }
   };
 
-  // Enhanced blur effect to content when sidebar is expanded and not collapsed
   useEffect(() => {
     const mainContent = document.querySelector('main');
     if (mainContent && !collapsed && expandedItem) {
       mainContent.classList.add('blur-sm', 'transition-all', 'duration-300');
-      // Add a semi-transparent overlay to emphasize the sidebar
       let overlay = document.getElementById('sidebar-overlay');
       if (!overlay) {
         overlay = document.createElement('div');
@@ -96,7 +92,6 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
       }
     } else {
       mainContent?.classList.remove('blur-sm', 'transition-all', 'duration-300');
-      // Remove the overlay when sidebar is collapsed
       const overlay = document.getElementById('sidebar-overlay');
       if (overlay) {
         document.body.removeChild(overlay);
