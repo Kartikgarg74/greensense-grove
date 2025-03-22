@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/components/ui/use-toast";
+import mongoDBService, { UserData } from '@/services/MongoDBService';
 
 interface User {
   id: string;
@@ -44,11 +45,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Check if user is already logged in on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem('greensense_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
+    const checkUserAuth = async () => {
+      const storedUser = localStorage.getItem('greensense_user');
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        
+        // Update last login in MongoDB
+        if (parsedUser.id) {
+          await mongoDBService.updateUserLastLogin(parsedUser.id);
+        }
+      }
+      setIsLoading(false);
+    };
+    
+    checkUserAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -69,6 +80,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         name: email.split('@')[0],
         role: 'farmer',
       };
+      
+      // Save user data to MongoDB
+      await mongoDBService.saveUserData({
+        email: demoUser.email,
+        name: demoUser.name,
+        role: demoUser.role,
+        lastLogin: new Date()
+      });
       
       setUser(demoUser);
       localStorage.setItem('greensense_user', JSON.stringify(demoUser));
@@ -108,6 +127,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         name: userData.fullName,
         role: userData.userType,
       };
+      
+      // Save user data to MongoDB
+      const savedUser = await mongoDBService.saveUserData({
+        email: newUser.email,
+        name: newUser.name,
+        role: newUser.role,
+        lastLogin: new Date()
+      });
+      
+      // If we got a user ID back from MongoDB, use it
+      if (savedUser && savedUser.id) {
+        newUser.id = savedUser.id;
+      }
       
       setUser(newUser);
       localStorage.setItem('greensense_user', JSON.stringify(newUser));
