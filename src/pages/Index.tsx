@@ -158,9 +158,9 @@ const Index = () => {
                   <h3 className="text-xl font-semibold">Plant Disease Detection</h3>
                 </div>
                 <p className="text-gray-600 mb-4">
-                  Our advanced AI algorithms can identify plant diseases from images with high accuracy. 
+                  Our advanced AI algorithms powered by Google ML Kit can identify plant diseases from images with high accuracy. 
                   Simply upload a photo of your affected plant, and receive instant diagnosis along with 
-                  recommended treatments.
+                  recommended treatments. Our system analyzes visual patterns, leaf discoloration, and growth abnormalities to provide precise diagnoses.
                 </p>
                 <Link to="/crop-insight/disease" className="text-green-600 font-medium flex items-center gap-1 hover:underline">
                   <span>Learn more</span>
@@ -177,8 +177,8 @@ const Index = () => {
                 </div>
                 <p className="text-gray-600 mb-4">
                   Identify any plant species with our visual recognition system powered by Google ML Kit. 
-                  Gain detailed information about its characteristics, growth conditions, 
-                  and traditional uses in Ayurvedic medicine.
+                  Gain detailed information about its characteristics, growth conditions, cultivation requirements, and potential uses. 
+                  The system processes images through advanced neural networks trained on extensive plant databases.
                 </p>
                 <Link to="/plant-wisdom/identification" className="text-blue-600 font-medium flex items-center gap-1 hover:underline">
                   <span>Learn more</span>
@@ -196,7 +196,8 @@ const Index = () => {
                 <p className="text-gray-600 mb-4">
                   Receive personalized crop recommendations based on soil analysis, local climate data, 
                   and geospatial information. Our system leverages mapping APIs and AI to suggest the most 
-                  suitable crops for your specific location and conditions.
+                  suitable crops for your specific location and conditions. We analyze soil composition, seasonal patterns, 
+                  rainfall distribution, and historical yield data to optimize your farming strategy.
                 </p>
                 <Link to="/crop-insight/recommendations" className="text-amber-600 font-medium flex items-center gap-1 hover:underline">
                   <span>Learn more</span>
@@ -214,7 +215,8 @@ const Index = () => {
                 <p className="text-gray-600 mb-4">
                   Monitor your farm's vital parameters in real-time with our IoT integration. Track soil moisture, 
                   temperature, humidity, and more through connected devices. Receive alerts and recommendations 
-                  based on environmental conditions.
+                  based on environmental conditions. Our system connects to various sensor types and provides actionable insights 
+                  through a centralized dashboard, enabling precise water management and resource optimization.
                 </p>
                 <Link to="/farm-control/dashboard" className="text-purple-600 font-medium flex items-center gap-1 hover:underline">
                   <span>Learn more</span>
@@ -234,7 +236,8 @@ const Index = () => {
                 <p className="text-gray-600 mb-4">
                   Access comprehensive documentation including system architecture, user guides, and API references. 
                   Learn about the Google ML Kit APIs we use for image processing and how our platform integrates 
-                  with MongoDB for data storage and analysis.
+                  with MongoDB for data storage and analysis. We provide detailed examples, implementation guides, and best practices 
+                  to help you maximize the platform's capabilities.
                 </p>
                 <Link to="/documentation" className="text-sky-600 font-medium flex items-center gap-1 hover:underline">
                   <span>View documentation</span>
@@ -252,9 +255,10 @@ const Index = () => {
                 <p className="text-gray-600 mb-4">
                   Find answers to frequently asked questions, learn how to use each feature, and get in touch with 
                   our support team. We're here to help you get the most out of our platform and improve your 
-                  agricultural practices.
+                  agricultural practices. Our comprehensive help center includes video tutorials, troubleshooting guides, 
+                  and a community forum where you can connect with other users.
                 </p>
-                <Link to="/help" className="text-teal-600 font-medium flex items-center gap-1 hover:underline">
+                <Link to="/help/faq" className="text-teal-600 font-medium flex items-center gap-1 hover:underline">
                   <span>Get help</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
