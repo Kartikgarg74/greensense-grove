@@ -9,7 +9,9 @@ import {
   Sprout, 
   BarChart, 
   CloudSun, 
-  User
+  User,
+  HelpCircle,
+  BookOpen
 } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -107,7 +109,7 @@ const Index = () => {
               <div className="animate-on-scroll">
                 <FeatureCard
                   title="PlantWisdom Hub"
-                  description="Explore 3D plants, identify species, and access traditional Ayurvedic knowledge."
+                  description="Identify plant species and access traditional Ayurvedic knowledge."
                   icon={<Leaf />}
                   linkTo="/plant-wisdom"
                   colorScheme="green"
@@ -137,8 +139,132 @@ const Index = () => {
           </div>
         </section>
         
+        {/* Enhanced Learn More Section */}
+        <section className="py-20 bg-greensense-50" id="learn-more">
+          <div className="container-standard">
+            <div className="text-center max-w-3xl mx-auto mb-12 animate-on-scroll">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Learn More About Our Services</h2>
+              <p className="text-lg text-gray-600">
+                Discover how our integrated platforms can transform your agricultural practices.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+              <div className="bg-white rounded-xl p-6 shadow-sm animate-on-scroll">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                    <Sprout className="w-6 h-6 text-green-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold">Plant Disease Detection</h3>
+                </div>
+                <p className="text-gray-600 mb-4">
+                  Our advanced AI algorithms can identify plant diseases from images with high accuracy. 
+                  Simply upload a photo of your affected plant, and receive instant diagnosis along with 
+                  recommended treatments.
+                </p>
+                <Link to="/crop-insight/disease" className="text-green-600 font-medium flex items-center gap-1 hover:underline">
+                  <span>Learn more</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+              
+              <div className="bg-white rounded-xl p-6 shadow-sm animate-on-scroll" style={{ animationDelay: '100ms' }}>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                    <Leaf className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold">Plant Identification</h3>
+                </div>
+                <p className="text-gray-600 mb-4">
+                  Identify any plant species with our visual recognition system powered by Google ML Kit. 
+                  Gain detailed information about its characteristics, growth conditions, 
+                  and traditional uses in Ayurvedic medicine.
+                </p>
+                <Link to="/plant-wisdom/identification" className="text-blue-600 font-medium flex items-center gap-1 hover:underline">
+                  <span>Learn more</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+              
+              <div className="bg-white rounded-xl p-6 shadow-sm animate-on-scroll" style={{ animationDelay: '200ms' }}>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
+                    <BarChart className="w-6 h-6 text-amber-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold">Crop Recommendations</h3>
+                </div>
+                <p className="text-gray-600 mb-4">
+                  Receive personalized crop recommendations based on soil analysis, local climate data, 
+                  and geospatial information. Our system leverages mapping APIs and AI to suggest the most 
+                  suitable crops for your specific location and conditions.
+                </p>
+                <Link to="/crop-insight/recommendations" className="text-amber-600 font-medium flex items-center gap-1 hover:underline">
+                  <span>Learn more</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+              
+              <div className="bg-white rounded-xl p-6 shadow-sm animate-on-scroll" style={{ animationDelay: '300ms' }}>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+                    <CloudSun className="w-6 h-6 text-purple-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold">IoT-Based Plant Monitoring</h3>
+                </div>
+                <p className="text-gray-600 mb-4">
+                  Monitor your farm's vital parameters in real-time with our IoT integration. Track soil moisture, 
+                  temperature, humidity, and more through connected devices. Receive alerts and recommendations 
+                  based on environmental conditions.
+                </p>
+                <Link to="/farm-control/dashboard" className="text-purple-600 font-medium flex items-center gap-1 hover:underline">
+                  <span>Learn more</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-on-scroll" style={{ animationDelay: '400ms' }}>
+              <div className="bg-white rounded-xl p-6 shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-sky-100 flex items-center justify-center">
+                    <BookOpen className="w-6 h-6 text-sky-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold">Documentation & Resources</h3>
+                </div>
+                <p className="text-gray-600 mb-4">
+                  Access comprehensive documentation including system architecture, user guides, and API references. 
+                  Learn about the Google ML Kit APIs we use for image processing and how our platform integrates 
+                  with MongoDB for data storage and analysis.
+                </p>
+                <Link to="/documentation" className="text-sky-600 font-medium flex items-center gap-1 hover:underline">
+                  <span>View documentation</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+              
+              <div className="bg-white rounded-xl p-6 shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center">
+                    <HelpCircle className="w-6 h-6 text-teal-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold">Help & FAQs</h3>
+                </div>
+                <p className="text-gray-600 mb-4">
+                  Find answers to frequently asked questions, learn how to use each feature, and get in touch with 
+                  our support team. We're here to help you get the most out of our platform and improve your 
+                  agricultural practices.
+                </p>
+                <Link to="/help" className="text-teal-600 font-medium flex items-center gap-1 hover:underline">
+                  <span>Get help</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+        
         {/* Benefits Section */}
-        <section className="py-20 bg-greensense-50">
+        <section className="py-20 bg-white">
           <div className="container-standard">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div className="animate-on-scroll">
@@ -209,18 +335,11 @@ const Index = () => {
               
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link 
-                  to="/dashboard"
+                  to="/auth/register"
                   className="px-6 py-3 bg-greensense-600 hover:bg-greensense-700 text-white font-medium rounded-lg flex items-center gap-2 min-w-[180px] justify-center transition-colors"
                 >
                   <span>Get Started</span>
                   <ArrowRight className="w-4 h-4" />
-                </Link>
-                
-                <Link 
-                  to="/contact"
-                  className="px-6 py-3 bg-white hover:bg-gray-50 text-gray-800 font-medium rounded-lg border border-gray-200 min-w-[180px] transition-colors"
-                >
-                  Contact Sales
                 </Link>
               </div>
             </div>

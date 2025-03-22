@@ -19,7 +19,6 @@ import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 
 // PlantWisdom sub-pages
-import PlantExplorer from "./pages/plant-wisdom/PlantExplorer";
 import PlantIdentification from "./pages/plant-wisdom/PlantIdentification";
 import KnowledgeBase from "./pages/plant-wisdom/KnowledgeBase";
 
@@ -32,6 +31,13 @@ import CropRecommendations from "./pages/crop-insight/CropRecommendations";
 import IoTDashboard from "./pages/farm-control/IoTDashboard";
 import IrrigationControl from "./pages/farm-control/IrrigationControl";
 import EnvironmentalAnalysis from "./pages/farm-control/EnvironmentalAnalysis";
+
+// New pages
+import Documentation from "./pages/Documentation";
+import About from "./pages/About";
+import Help from "./pages/Help";
+import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
+import TermsOfService from "./pages/legal/TermsOfService";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +53,13 @@ const App = () => (
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/register" element={<Register />} />
             
+            {/* Documentation & Help Pages */}
+            <Route path="/documentation" element={<Documentation />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/help" element={<Help />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
+            
             {/* Protected Routes */}
             <Route path="/dashboard" element={
               <ProtectedRoute>
@@ -58,11 +71,6 @@ const App = () => (
             <Route path="/plant-wisdom" element={
               <ProtectedRoute>
                 <PlantWisdom />
-              </ProtectedRoute>
-            } />
-            <Route path="/plant-wisdom/explorer" element={
-              <ProtectedRoute>
-                <PlantExplorer />
               </ProtectedRoute>
             } />
             <Route path="/plant-wisdom/identification" element={

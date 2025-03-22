@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, 
@@ -30,7 +30,6 @@ const sidebarItems: SidebarItem[] = [
     icon: <Leaf className="w-5 h-5" />,
     path: '/plant-wisdom',
     children: [
-      { title: '3D Plant Explorer', path: '/plant-wisdom/explorer' },
       { title: 'Plant Identification', path: '/plant-wisdom/identification' },
       { title: 'Ayurvedic Knowledge Base', path: '/plant-wisdom/knowledge-base' },
     ]
@@ -54,11 +53,6 @@ const sidebarItems: SidebarItem[] = [
       { title: 'Irrigation Control', path: '/farm-control/irrigation' },
       { title: 'Environmental Analysis', path: '/farm-control/environment' },
     ]
-  },
-  {
-    title: 'Settings',
-    icon: <Settings className="w-5 h-5" />,
-    path: '/settings'
   }
 ];
 
@@ -85,6 +79,16 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
       setExpandedItem(title);
     }
   };
+
+  // Add blur effect to content when sidebar is expanded and not collapsed
+  useEffect(() => {
+    const mainContent = document.querySelector('main');
+    if (mainContent && !collapsed && expandedItem) {
+      mainContent.classList.add('blur-sm', 'transition-all', 'duration-300');
+    } else if (mainContent) {
+      mainContent.classList.remove('blur-sm', 'transition-all', 'duration-300');
+    }
+  }, [collapsed, expandedItem]);
 
   return (
     <aside

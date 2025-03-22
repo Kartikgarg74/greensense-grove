@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Leaf, 
   Sprout, 
@@ -13,16 +13,68 @@ import {
   LineChart,
   Wrench,
   Bell,
-  ArrowRight
+  ArrowRight,
+  Search
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import Sidebar from '@/components/layout/Sidebar';
 import GlassCard from '@/components/ui-elements/GlassCard';
 import StatCard from '@/components/dashboard/StatCard';
 import FeatureCard from '@/components/dashboard/FeatureCard';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { toast } from '@/components/ui/use-toast';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const [scanDialogOpen, setScanDialogOpen] = useState(false);
+  const [notificationsVisible, setNotificationsVisible] = useState(false);
+  
+  const notifications = [
+    {
+      id: 1,
+      title: "Low Soil Moisture Detected",
+      message: "Field 3 moisture levels have dropped below 40%. Consider irrigation.",
+      time: "10 minutes ago",
+      type: "warning"
+    },
+    {
+      id: 2,
+      title: "Temperature Alert",
+      message: "Greenhouse temperature has exceeded optimal range (28°C).",
+      time: "1 hour ago",
+      type: "alert"
+    },
+    {
+      id: 3,
+      title: "System Update",
+      message: "New disease detection models have been added to the system.",
+      time: "2 hours ago",
+      type: "info"
+    }
+  ];
+
+  const handleScanPlant = () => {
+    setScanDialogOpen(true);
+  };
+
+  const navigateToFeature = (path: string) => {
+    setScanDialogOpen(false);
+    navigate(path);
+  };
+
+  const toggleNotifications = () => {
+    setNotificationsVisible(!notificationsVisible);
+    
+    // If opening notifications, mark them as read
+    if (!notificationsVisible) {
+      // In a real app, you would call an API to mark notifications as read
+      console.log('Marking notifications as read');
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -42,10 +94,52 @@ const Dashboard = () => {
                   </div>
                   
                   <div className="flex items-center gap-4">
-                    <button className="p-2 rounded-full bg-greensense-50 hover:bg-greensense-100 transition-colors">
-                      <Bell className="w-5 h-5 text-greensense-600" />
-                    </button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-greensense-600 hover:bg-greensense-700 text-white rounded-lg transition-colors">
+                    <div className="relative">
+                      <button 
+                        className="p-2 rounded-full bg-greensense-50 hover:bg-greensense-100 transition-colors relative"
+                        onClick={toggleNotifications}
+                      >
+                        <Bell className="w-5 h-5 text-greensense-600" />
+                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">
+                          {notifications.length}
+                        </span>
+                      </button>
+                      
+                      {notificationsVisible && (
+                        <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-50 overflow-hidden">
+                          <div className="p-3 border-b border-gray-100">
+                            <h3 className="font-medium">Notifications</h3>
+                          </div>
+                          <div className="max-h-80 overflow-y-auto">
+                            {notifications.map(notification => (
+                              <div key={notification.id} className="p-3 border-b border-gray-100 hover:bg-gray-50">
+                                <div className="flex items-start gap-3">
+                                  <div className={`w-2 h-2 rounded-full mt-2 ${
+                                    notification.type === 'warning' ? 'bg-amber-500' : 
+                                    notification.type === 'alert' ? 'bg-red-500' : 
+                                    'bg-blue-500'
+                                  }`}></div>
+                                  <div>
+                                    <h4 className="font-medium text-sm">{notification.title}</h4>
+                                    <p className="text-xs text-gray-600 mt-1">{notification.message}</p>
+                                    <p className="text-xs text-gray-400 mt-1">{notification.time}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="p-3 border-t border-gray-100 text-center">
+                            <button className="text-xs text-greensense-600 font-medium hover:underline">
+                              View All Notifications
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <button 
+                      className="flex items-center gap-2 px-4 py-2 bg-greensense-600 hover:bg-greensense-700 text-white rounded-lg transition-colors"
+                      onClick={handleScanPlant}
+                    >
                       <ScanLine className="w-4 h-4" />
                       <span>Scan Plants</span>
                     </button>
@@ -176,7 +270,7 @@ const Dashboard = () => {
               
               {/* Quick Actions */}
               <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-12">
                 <FeatureCard
                   title="Plant Identification"
                   description="Identify plants and access information quickly."
@@ -200,19 +294,54 @@ const Dashboard = () => {
                   linkTo="/farm-control/dashboard"
                   colorScheme="amber"
                 />
-                
-                <FeatureCard
-                  title="System Settings"
-                  description="Configure your GreenSense AI settings."
-                  icon={<Wrench />}
-                  linkTo="/settings"
-                  colorScheme="default"
-                />
               </div>
             </div>
           </main>
         </div>
       </div>
+      
+      <Dialog open={scanDialogOpen} onOpenChange={setScanDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Scan Plant</DialogTitle>
+            <DialogDescription>
+              What would you like to do with your plant scan?
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+            <div 
+              className="bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors"
+              onClick={() => navigateToFeature('/crop-insight/disease')}
+            >
+              <div className="mb-3 w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                <Search className="w-6 h-6 text-blue-600" />
+              </div>
+              <h3 className="font-medium text-gray-900 mb-1">Detect Disease</h3>
+              <p className="text-sm text-gray-500">
+                Identify diseases affecting your plant and get treatment recommendations.
+              </p>
+            </div>
+            
+            <div 
+              className="bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-green-400 hover:bg-green-50 transition-colors"
+              onClick={() => navigateToFeature('/plant-wisdom/identification')}
+            >
+              <div className="mb-3 w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                <Leaf className="w-6 h-6 text-green-600" />
+              </div>
+              <h3 className="font-medium text-gray-900 mb-1">Identify Plant</h3>
+              <p className="text-sm text-gray-500">
+                Identify the plant species and learn about its characteristics and uses.
+              </p>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setScanDialogOpen(false)}>Cancel</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       
       <Footer />
     </div>
