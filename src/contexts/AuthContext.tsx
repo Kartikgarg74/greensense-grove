@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/components/ui/use-toast";
 import mongoDBService, { UserData } from '@/services/MongoDBService';
 
+// Types
 interface User {
   id: string;
   email: string;
@@ -27,8 +28,14 @@ interface RegisterData {
   userType: 'farmer' | 'researcher' | 'student' | 'business' | 'other';
 }
 
+// Create context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * Custom hook to use the auth context
+ * @returns AuthContextType
+ * @throws Error if used outside AuthProvider
+ */
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -37,11 +44,28 @@ export const useAuth = () => {
   return context;
 };
 
+/**
+ * Authentication Provider Component
+ * Manages auth state and provides auth methods
+ */
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Initialize MongoDB connection
+  useEffect(() => {
+    const initializeConnection = async () => {
+      try {
+        await mongoDBService.connect();
+      } catch (error) {
+        console.error('Failed to initialize MongoDB connection:', error);
+      }
+    };
+    
+    initializeConnection();
+  }, []);
 
   // Check if user is already logged in on mount
   useEffect(() => {
@@ -69,10 +93,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     checkUserAuth();
   }, []);
 
+  /**
+   * Authenticate user with email and password
+   * @param email User email
+   * @param password User password
+   */
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Validate input
+      // Input validation
       if (!email || !password) {
         throw new Error('Please provide both email and password');
       }
@@ -106,17 +135,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toast({
         variant: "destructive",
         title: "Login failed",
-        description: (error as Error).message || "An error occurred during login",
+        description: error instanceof Error ? error.message : "An error occurred during login",
       });
+      console.error('Login error:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
+  /**
+   * Register a new user
+   * @param userData User registration data
+   */
   const register = async (userData: RegisterData) => {
     setIsLoading(true);
     try {
-      // Validate input
+      // Input validation
       if (!userData.email || !userData.password || !userData.fullName) {
         throw new Error('Please fill in all required fields');
       }
@@ -125,7 +159,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const registeredUser = await mongoDBService.registerUser({
         email: userData.email,
         name: userData.fullName,
-        password: userData.password, // In a real app, this would be hashed on the server
+        password: userData.password,
         role: userData.userType,
       });
       
@@ -155,13 +189,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toast({
         variant: "destructive",
         title: "Registration failed",
-        description: (error as Error).message || "An error occurred during registration",
+        description: error instanceof Error ? error.message : "An error occurred during registration",
       });
+      console.error('Registration error:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
+  /**
+   * Log out the current user
+   */
   const logout = () => {
     setUser(null);
     localStorage.removeItem('greensense_user');
@@ -172,15 +210,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     navigate('/');
   };
 
+  // Create context value
+  const authContextValue: AuthContextType = {
+    user, 
+    isAuthenticated: !!user, 
+    isLoading, 
+    login, 
+    register, 
+    logout
+  };
+
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      isAuthenticated: !!user, 
-      isLoading, 
-      login, 
-      register, 
-      logout 
-    }}>
+    <AuthContext.Provider value={authContextValue}>
       {children}
     </AuthContext.Provider>
   );
