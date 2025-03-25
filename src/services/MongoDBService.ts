@@ -1,11 +1,13 @@
 
 import { toast } from '@/components/ui/use-toast';
+import { create } from 'zustand';
 
 // Types for database models
 export interface UserData {
   id: string;
   email: string;
   name: string;
+  password: string; // Will be hashed in a real backend
   role: 'farmer' | 'researcher' | 'student' | 'business' | 'other';
   createdAt: Date;
   lastLogin: Date;
@@ -52,128 +54,184 @@ export interface UserQuery {
   response?: string;
 }
 
+// Store to maintain database connection state
+interface MongoDBState {
+  isConnected: boolean;
+  isConnecting: boolean;
+  connectionError: string | null;
+  setConnected: (status: boolean) => void;
+  setConnecting: (status: boolean) => void;
+  setConnectionError: (error: string | null) => void;
+}
+
+const useMongoDBStore = create<MongoDBState>((set) => ({
+  isConnected: false,
+  isConnecting: false,
+  connectionError: null,
+  setConnected: (status) => set({ isConnected: status }),
+  setConnecting: (status) => set({ isConnecting: status }),
+  setConnectionError: (error) => set({ connectionError: error }),
+}));
+
 class MongoDBService {
   private readonly connectionString: string = 'mongodb+srv://deepanshusnpt:122ZUNw9w6PNKUpt@farmer.lxen6.mongodb.net/';
-  private isConnected: boolean = false;
-  private db: any = null;
-
+  
   constructor() {
     console.log('MongoDB Service initialized');
-    this.checkConnection();
+    this.connectToDatabase();
   }
 
-  private async checkConnection(): Promise<boolean> {
+  private async connectToDatabase(): Promise<boolean> {
+    const { setConnecting, setConnected, setConnectionError } = useMongoDBStore.getState();
+    
     try {
-      // In a browser environment, direct MongoDB connections aren't possible
-      // We would typically use a backend API to connect to MongoDB
-      // This simulates a successful connection for the frontend
-      console.log('Checking MongoDB connection...');
+      setConnecting(true);
+      console.log('Connecting to MongoDB...');
+      
+      // In a real implementation, we would use a backend API to connect to MongoDB
+      // Since we can't directly connect from the browser, we'll simulate the connection
       
       // Simulate connection delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // For demo purposes, we'll assume connection is successful
-      this.isConnected = true;
+      // For demo purposes, we'll connect successfully
       console.log('MongoDB connected successfully');
-      
-      // In a real app with a backend, we would initialize the database here
+      setConnected(true);
+      setConnecting(false);
+      setConnectionError(null);
       return true;
     } catch (error) {
       console.error('MongoDB connection error:', error);
-      this.isConnected = false;
+      setConnected(false);
+      setConnecting(false);
+      setConnectionError((error as Error).message);
       return false;
+    }
+  }
+
+  // --- Authentication methods ---
+  
+  async authenticateUser(email: string, password: string): Promise<UserData | null> {
+    try {
+      console.log(`Authenticating user: ${email}`);
+      
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // In a real implementation, we would make an API call to authenticate
+      // For demo purposes, we'll check localStorage
+      const users = JSON.parse(localStorage.getItem('greensense_users') || '[]') as UserData[];
+      const user = users.find(u => u.email === email);
+      
+      if (!user) {
+        console.error('User not found');
+        return null;
+      }
+      
+      // In a real implementation, we would compare hashed passwords
+      if (user.password !== password) {
+        console.error('Invalid password');
+        return null;
+      }
+      
+      // Update last login
+      user.lastLogin = new Date();
+      
+      // Update the user in localStorage
+      localStorage.setItem('greensense_users', JSON.stringify(
+        users.map(u => u.id === user.id ? user : u)
+      ));
+      
+      return user;
+    } catch (error) {
+      console.error('Authentication error:', error);
+      return null;
+    }
+  }
+  
+  async registerUser(userData: Omit<UserData, 'id' | 'createdAt' | 'lastLogin'>): Promise<UserData | null> {
+    try {
+      console.log('Registering user:', userData);
+      
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // In a real implementation, we would make an API call to register
+      // For demo purposes, we'll use localStorage
+      
+      // Check if user already exists
+      const users = JSON.parse(localStorage.getItem('greensense_users') || '[]') as UserData[];
+      
+      if (users.some(u => u.email === userData.email)) {
+        console.error('User already exists');
+        return null;
+      }
+      
+      // Create new user
+      const newUser: UserData = {
+        ...userData,
+        id: Math.random().toString(36).substring(2, 15),
+        createdAt: new Date(),
+        lastLogin: new Date()
+      };
+      
+      // Save to localStorage
+      users.push(newUser);
+      localStorage.setItem('greensense_users', JSON.stringify(users));
+      
+      return newUser;
+    } catch (error) {
+      console.error('Registration error:', error);
+      return null;
     }
   }
 
   // --- User data methods ---
   
-  async saveUserData(userData: Omit<UserData, 'id' | 'createdAt'>): Promise<UserData | null> {
-    if (!this.isConnected) await this.checkConnection();
-    
+  async getUserById(userId: string): Promise<UserData | null> {
     try {
-      console.log('Saving user data:', userData);
-      // In a real app, this would insert a document into MongoDB
-      
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 600));
-      
-      // Create a new user with ID and timestamp
-      const newUser: UserData = {
-        ...userData,
-        id: Math.random().toString(36).substring(2, 15),
-        createdAt: new Date(),
-      };
-      
-      console.log('User saved successfully:', newUser);
-      return newUser;
-    } catch (error) {
-      console.error('Error saving user data:', error);
-      toast({
-        title: "Database Error",
-        description: "Could not save user data. Please try again later.",
-        variant: "destructive"
-      });
-      return null;
-    }
-  }
-
-  async getUserData(userId: string): Promise<UserData | null> {
-    if (!this.isConnected) await this.checkConnection();
-    
-    try {
-      console.log(`Fetching user data for ID: ${userId}`);
-      // In a real app, this would query the MongoDB collection
+      console.log(`Fetching user with ID: ${userId}`);
       
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // For demo purposes, retrieve from localStorage if available
-      const storedUser = localStorage.getItem('greensense_user');
-      if (storedUser) {
-        const userData = JSON.parse(storedUser);
-        return {
-          id: userData.id,
-          email: userData.email,
-          name: userData.name,
-          role: userData.role,
-          createdAt: new Date(userData.createdAt || '2023-01-15'),
-          lastLogin: new Date()
-        };
+      // In a real implementation, we would make an API call
+      // For demo purposes, we'll use localStorage
+      const users = JSON.parse(localStorage.getItem('greensense_users') || '[]') as UserData[];
+      const user = users.find(u => u.id === userId);
+      
+      if (!user) {
+        console.error('User not found');
+        return null;
       }
       
-      // Mock user data as fallback
-      const userData: UserData = {
-        id: userId,
-        email: 'user@example.com',
-        name: 'Sample User',
-        role: 'farmer',
-        createdAt: new Date('2023-01-15'),
-        lastLogin: new Date()
-      };
-      
-      return userData;
+      return user;
     } catch (error) {
-      console.error('Error fetching user data:', error);
-      toast({
-        title: "Database Error",
-        description: "Could not fetch user data. Please try again later.",
-        variant: "destructive"
-      });
+      console.error('Error fetching user:', error);
       return null;
     }
   }
-
+  
   async updateUserLastLogin(userId: string): Promise<boolean> {
-    if (!this.isConnected) await this.checkConnection();
-    
     try {
       console.log(`Updating last login for user ID: ${userId}`);
-      // In a real app, this would update a document in MongoDB
       
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 300));
       
-      console.log('Last login updated successfully');
+      // In a real implementation, we would make an API call
+      // For demo purposes, we'll use localStorage
+      const users = JSON.parse(localStorage.getItem('greensense_users') || '[]') as UserData[];
+      const userIndex = users.findIndex(u => u.id === userId);
+      
+      if (userIndex === -1) {
+        console.error('User not found');
+        return false;
+      }
+      
+      users[userIndex].lastLogin = new Date();
+      localStorage.setItem('greensense_users', JSON.stringify(users));
+      
       return true;
     } catch (error) {
       console.error('Error updating last login:', error);
@@ -184,38 +242,31 @@ class MongoDBService {
   // --- Plant analysis methods ---
   
   async savePlantAnalysis(analysis: Omit<PlantAnalysis, 'id' | 'createdAt'>): Promise<PlantAnalysis | null> {
-    if (!this.isConnected) await this.checkConnection();
-    
     try {
       console.log('Saving plant analysis:', analysis);
-      // In a real app, this would insert a document into MongoDB
       
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      // Mock response with generated ID
-      const savedAnalysis: PlantAnalysis = {
+      // Create a new analysis with ID and timestamp
+      const newAnalysis: PlantAnalysis = {
         ...analysis,
         id: Math.random().toString(36).substring(2, 15),
         createdAt: new Date()
       };
       
-      // Store in localStorage for persistence in the demo
-      const key = `plant_analysis_${savedAnalysis.id}`;
-      localStorage.setItem(key, JSON.stringify(savedAnalysis));
-      
-      // Add to user's analyses list
-      const userAnalysesKey = `user_${analysis.userId}_plant_analyses`;
-      const existingAnalyses = JSON.parse(localStorage.getItem(userAnalysesKey) || '[]');
-      existingAnalyses.push(savedAnalysis.id);
-      localStorage.setItem(userAnalysesKey, JSON.stringify(existingAnalyses));
+      // In a real implementation, we would make an API call
+      // For demo purposes, we'll use localStorage
+      const analyses = JSON.parse(localStorage.getItem('greensense_plant_analyses') || '[]') as PlantAnalysis[];
+      analyses.push(newAnalysis);
+      localStorage.setItem('greensense_plant_analyses', JSON.stringify(analyses));
       
       toast({
         title: "Analysis Saved",
         description: `Plant analysis for ${analysis.plantName} has been saved.`
       });
       
-      return savedAnalysis;
+      return newAnalysis;
     } catch (error) {
       console.error('Error saving plant analysis:', error);
       toast({
@@ -228,29 +279,17 @@ class MongoDBService {
   }
 
   async getUserPlantAnalyses(userId: string): Promise<PlantAnalysis[]> {
-    if (!this.isConnected) await this.checkConnection();
-    
     try {
       console.log(`Fetching plant analyses for user ID: ${userId}`);
-      // In a real app, this would query the MongoDB collection
       
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 700));
       
-      // Get analyses IDs from localStorage
-      const userAnalysesKey = `user_${userId}_plant_analyses`;
-      const analysesIds = JSON.parse(localStorage.getItem(userAnalysesKey) || '[]');
+      // In a real implementation, we would make an API call
+      // For demo purposes, we'll use localStorage
+      const analyses = JSON.parse(localStorage.getItem('greensense_plant_analyses') || '[]') as PlantAnalysis[];
       
-      // Retrieve each analysis
-      const analyses: PlantAnalysis[] = [];
-      for (const id of analysesIds) {
-        const analysisData = localStorage.getItem(`plant_analysis_${id}`);
-        if (analysisData) {
-          analyses.push(JSON.parse(analysisData));
-        }
-      }
-      
-      return analyses;
+      return analyses.filter(a => a.userId === userId);
     } catch (error) {
       console.error('Error fetching plant analyses:', error);
       toast({
@@ -265,38 +304,31 @@ class MongoDBService {
   // --- Disease detection methods ---
   
   async saveDiseaseDetection(detection: Omit<DiseaseDetection, 'id' | 'createdAt'>): Promise<DiseaseDetection | null> {
-    if (!this.isConnected) await this.checkConnection();
-    
     try {
       console.log('Saving disease detection:', detection);
-      // In a real app, this would insert a document into MongoDB
       
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      // Mock response with generated ID
-      const savedDetection: DiseaseDetection = {
+      // Create a new detection with ID and timestamp
+      const newDetection: DiseaseDetection = {
         ...detection,
         id: Math.random().toString(36).substring(2, 15),
         createdAt: new Date()
       };
       
-      // Store in localStorage for persistence in the demo
-      const key = `disease_detection_${savedDetection.id}`;
-      localStorage.setItem(key, JSON.stringify(savedDetection));
-      
-      // Add to user's detections list
-      const userDetectionsKey = `user_${detection.userId}_disease_detections`;
-      const existingDetections = JSON.parse(localStorage.getItem(userDetectionsKey) || '[]');
-      existingDetections.push(savedDetection.id);
-      localStorage.setItem(userDetectionsKey, JSON.stringify(existingDetections));
+      // In a real implementation, we would make an API call
+      // For demo purposes, we'll use localStorage
+      const detections = JSON.parse(localStorage.getItem('greensense_disease_detections') || '[]') as DiseaseDetection[];
+      detections.push(newDetection);
+      localStorage.setItem('greensense_disease_detections', JSON.stringify(detections));
       
       toast({
         title: "Detection Saved",
         description: `Disease detection for ${detection.plantName} has been saved.`
       });
       
-      return savedDetection;
+      return newDetection;
     } catch (error) {
       console.error('Error saving disease detection:', error);
       toast({
@@ -309,29 +341,17 @@ class MongoDBService {
   }
 
   async getUserDiseaseDetections(userId: string): Promise<DiseaseDetection[]> {
-    if (!this.isConnected) await this.checkConnection();
-    
     try {
       console.log(`Fetching disease detections for user ID: ${userId}`);
-      // In a real app, this would query the MongoDB collection
       
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 700));
       
-      // Get detection IDs from localStorage
-      const userDetectionsKey = `user_${userId}_disease_detections`;
-      const detectionIds = JSON.parse(localStorage.getItem(userDetectionsKey) || '[]');
+      // In a real implementation, we would make an API call
+      // For demo purposes, we'll use localStorage
+      const detections = JSON.parse(localStorage.getItem('greensense_disease_detections') || '[]') as DiseaseDetection[];
       
-      // Retrieve each detection
-      const detections: DiseaseDetection[] = [];
-      for (const id of detectionIds) {
-        const detectionData = localStorage.getItem(`disease_detection_${id}`);
-        if (detectionData) {
-          detections.push(JSON.parse(detectionData));
-        }
-      }
-      
-      return detections;
+      return detections.filter(d => d.userId === userId);
     } catch (error) {
       console.error('Error fetching disease detections:', error);
       toast({
@@ -346,33 +366,26 @@ class MongoDBService {
   // --- User queries methods ---
   
   async saveUserQuery(query: Omit<UserQuery, 'id' | 'timestamp'>): Promise<UserQuery | null> {
-    if (!this.isConnected) await this.checkConnection();
-    
     try {
       console.log('Saving user query:', query);
-      // In a real app, this would insert a document into MongoDB
       
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 300));
       
-      // Mock response with generated ID
-      const savedQuery: UserQuery = {
+      // Create a new query with ID and timestamp
+      const newQuery: UserQuery = {
         ...query,
         id: Math.random().toString(36).substring(2, 15),
         timestamp: new Date()
       };
       
-      // Store in localStorage for persistence in the demo
-      const key = `user_query_${savedQuery.id}`;
-      localStorage.setItem(key, JSON.stringify(savedQuery));
+      // In a real implementation, we would make an API call
+      // For demo purposes, we'll use localStorage
+      const queries = JSON.parse(localStorage.getItem('greensense_user_queries') || '[]') as UserQuery[];
+      queries.push(newQuery);
+      localStorage.setItem('greensense_user_queries', JSON.stringify(queries));
       
-      // Add to user's queries list
-      const userQueriesKey = `user_${query.userId}_queries`;
-      const existingQueries = JSON.parse(localStorage.getItem(userQueriesKey) || '[]');
-      existingQueries.push(savedQuery.id);
-      localStorage.setItem(userQueriesKey, JSON.stringify(existingQueries));
-      
-      return savedQuery;
+      return newQuery;
     } catch (error) {
       console.error('Error saving user query:', error);
       return null;
@@ -380,29 +393,17 @@ class MongoDBService {
   }
 
   async getUserQueries(userId: string): Promise<UserQuery[]> {
-    if (!this.isConnected) await this.checkConnection();
-    
     try {
       console.log(`Fetching queries for user ID: ${userId}`);
-      // In a real app, this would query the MongoDB collection
       
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Get query IDs from localStorage
-      const userQueriesKey = `user_${userId}_queries`;
-      const queryIds = JSON.parse(localStorage.getItem(userQueriesKey) || '[]');
+      // In a real implementation, we would make an API call
+      // For demo purposes, we'll use localStorage
+      const queries = JSON.parse(localStorage.getItem('greensense_user_queries') || '[]') as UserQuery[];
       
-      // Retrieve each query
-      const queries: UserQuery[] = [];
-      for (const id of queryIds) {
-        const queryData = localStorage.getItem(`user_query_${id}`);
-        if (queryData) {
-          queries.push(JSON.parse(queryData));
-        }
-      }
-      
-      return queries;
+      return queries.filter(q => q.userId === userId);
     } catch (error) {
       console.error('Error fetching user queries:', error);
       return [];
@@ -412,84 +413,64 @@ class MongoDBService {
   // --- Sensor data methods ---
   
   async saveSensorData(data: Omit<SensorData, 'id'>): Promise<SensorData | null> {
-    if (!this.isConnected) await this.checkConnection();
-    
     try {
       console.log('Saving sensor data:', data);
-      // In a real app, this would insert a document into MongoDB
       
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 300));
       
-      // Mock response with generated ID
-      const savedData: SensorData = {
+      // Create a new data point with ID
+      const newData: SensorData = {
         ...data,
         id: Math.random().toString(36).substring(2, 15)
       };
       
-      // Store in localStorage for persistence in the demo
-      const key = `sensor_data_${savedData.id}`;
-      localStorage.setItem(key, JSON.stringify(savedData));
+      // In a real implementation, we would make an API call
+      // For demo purposes, we'll use localStorage
+      const sensorData = JSON.parse(localStorage.getItem('greensense_sensor_data') || '[]') as SensorData[];
+      sensorData.push(newData);
+      localStorage.setItem('greensense_sensor_data', JSON.stringify(sensorData));
       
-      // Add to user's sensor data list
-      const userSensorDataKey = `user_${data.userId}_sensor_data_${data.deviceId}_${data.sensorType}`;
-      const existingData = JSON.parse(localStorage.getItem(userSensorDataKey) || '[]');
-      existingData.push(savedData.id);
-      localStorage.setItem(userSensorDataKey, JSON.stringify(existingData));
-      
-      return savedData;
+      return newData;
     } catch (error) {
       console.error('Error saving sensor data:', error);
-      console.warn('Failed to save sensor data point. Will retry later.');
       return null;
     }
   }
 
   async getSensorData(userId: string, deviceId: string, sensorType: string, startDate: Date, endDate: Date): Promise<SensorData[]> {
-    if (!this.isConnected) await this.checkConnection();
-    
     try {
       console.log(`Fetching ${sensorType} data for device ${deviceId}`);
-      // In a real app, this would query the MongoDB collection
       
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 700));
       
-      // Check if we have stored data for this combination
-      const userSensorDataKey = `user_${userId}_sensor_data_${deviceId}_${sensorType}`;
-      const sensorDataIds = JSON.parse(localStorage.getItem(userSensorDataKey) || '[]');
+      // In a real implementation, we would make an API call
+      // For demo purposes, we'll use localStorage
+      const sensorData = JSON.parse(localStorage.getItem('greensense_sensor_data') || '[]') as SensorData[];
       
-      if (sensorDataIds.length > 0) {
-        // Retrieve each sensor data point
-        const dataPoints: SensorData[] = [];
-        for (const id of sensorDataIds) {
-          const dataPoint = localStorage.getItem(`sensor_data_${id}`);
-          if (dataPoint) {
-            const parsedData = JSON.parse(dataPoint);
-            // Check if within date range
-            const timestamp = new Date(parsedData.timestamp);
-            if (timestamp >= startDate && timestamp <= endDate) {
-              dataPoints.push(parsedData);
-            }
-          }
-        }
-        
-        // Sort by timestamp
-        dataPoints.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-        
-        // If we have data points, return them
-        if (dataPoints.length > 0) {
-          return dataPoints;
-        }
+      // Filter data by user, device, sensor type, and date range
+      const filteredData = sensorData.filter(d => 
+        d.userId === userId && 
+        d.deviceId === deviceId && 
+        d.sensorType === sensorType &&
+        new Date(d.timestamp) >= startDate &&
+        new Date(d.timestamp) <= endDate
+      );
+      
+      // If we have data, return it sorted by timestamp
+      if (filteredData.length > 0) {
+        return filteredData.sort((a, b) => 
+          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        );
       }
       
-      // Fall back to generated mock data if no stored data
-      const dataPoints: SensorData[] = [];
+      // If no data, generate mock data
+      const mockData: SensorData[] = [];
       let currentDate = new Date(startDate);
       
       while (currentDate <= endDate) {
-        // Create a data point every hour
-        dataPoints.push({
+        mockData.push({
           id: Math.random().toString(36).substring(2, 15),
           userId,
           deviceId,
@@ -511,7 +492,7 @@ class MongoDBService {
         currentDate.setHours(currentDate.getHours() + 1);
       }
       
-      return dataPoints;
+      return mockData;
     } catch (error) {
       console.error('Error fetching sensor data:', error);
       toast({

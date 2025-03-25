@@ -46,17 +46,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Check if user is already logged in on mount
   useEffect(() => {
     const checkUserAuth = async () => {
-      const storedUser = localStorage.getItem('greensense_user');
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        
-        // Update last login in MongoDB
-        if (parsedUser.id) {
-          await mongoDBService.updateUserLastLogin(parsedUser.id);
+      try {
+        const storedUser = localStorage.getItem('greensense_user');
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+          
+          // Update last login in MongoDB
+          if (parsedUser.id) {
+            await mongoDBService.updateUserLastLogin(parsedUser.id);
+          }
         }
+      } catch (error) {
+        console.error('Error checking authentication:', error);
+        // Clear potentially corrupted data
+        localStorage.removeItem('greensense_user');
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
     
     checkUserAuth();
@@ -65,36 +72,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Simulate API call - in a real app, you would call your backend
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Simple validation - in real app, this would be server-side
-      if (email.trim() === '' || password.trim() === '') {
-        throw new Error('Invalid credentials');
+      // Validate input
+      if (!email || !password) {
+        throw new Error('Please provide both email and password');
       }
       
-      // Create a demo user - in a real app, this would come from your API
-      const demoUser: User = {
-        id: '1',
-        email,
-        name: email.split('@')[0],
-        role: 'farmer',
+      // Authenticate with MongoDB
+      const userData = await mongoDBService.authenticateUser(email, password);
+      
+      if (!userData) {
+        throw new Error('Invalid email or password');
+      }
+      
+      // Create user object
+      const authenticatedUser: User = {
+        id: userData.id,
+        email: userData.email,
+        name: userData.name,
+        role: userData.role,
       };
       
-      // Save user data to MongoDB
-      await mongoDBService.saveUserData({
-        email: demoUser.email,
-        name: demoUser.name,
-        role: demoUser.role,
-        lastLogin: new Date()
-      });
-      
-      setUser(demoUser);
-      localStorage.setItem('greensense_user', JSON.stringify(demoUser));
+      // Update state and localStorage
+      setUser(authenticatedUser);
+      localStorage.setItem('greensense_user', JSON.stringify(authenticatedUser));
       
       toast({
         title: "Login successful",
-        description: `Welcome back, ${demoUser.name}!`,
+        description: `Welcome back, ${authenticatedUser.name}!`,
       });
 
       navigate('/dashboard');
@@ -112,35 +116,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (userData: RegisterData) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Simple validation
+      // Validate input
       if (!userData.email || !userData.password || !userData.fullName) {
         throw new Error('Please fill in all required fields');
       }
       
-      // Create a new user
-      const newUser: User = {
-        id: Math.random().toString(36).substr(2, 9),
+      // Register with MongoDB
+      const registeredUser = await mongoDBService.registerUser({
         email: userData.email,
         name: userData.fullName,
+        password: userData.password, // In a real app, this would be hashed on the server
         role: userData.userType,
-      };
-      
-      // Save user data to MongoDB
-      const savedUser = await mongoDBService.saveUserData({
-        email: newUser.email,
-        name: newUser.name,
-        role: newUser.role,
-        lastLogin: new Date()
       });
       
-      // If we got a user ID back from MongoDB, use it
-      if (savedUser && savedUser.id) {
-        newUser.id = savedUser.id;
+      if (!registeredUser) {
+        throw new Error('Registration failed. Email might already be in use.');
       }
       
+      // Create user object
+      const newUser: User = {
+        id: registeredUser.id,
+        email: registeredUser.email,
+        name: registeredUser.name,
+        role: registeredUser.role,
+      };
+      
+      // Update state and localStorage
       setUser(newUser);
       localStorage.setItem('greensense_user', JSON.stringify(newUser));
       
